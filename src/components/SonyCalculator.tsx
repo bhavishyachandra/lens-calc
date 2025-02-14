@@ -1,11 +1,32 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, StyleSheet, ScrollView } from "react-native";
 import { TextInput, Button, Card, Title, Text, Surface, DataTable, SegmentedButtons } from "react-native-paper";
 import { sonyCameras, sonyLenses } from "../data/sonyData";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function SonyCalculator() {
   const [selectedCamera, setSelectedCamera] = useState("");
   const [selectedLens, setSelectedLens] = useState("");
+  const [myCameras, setMyCameras] = useState<number[]>([]);
+  const [myLenses, setMyLenses] = useState<number[]>([]);
+
+  useEffect(() => {
+    loadSavedGear();
+  }, []);
+
+  const loadSavedGear = async () => {
+    try {
+      const savedCameras = await AsyncStorage.getItem('myCameras');
+      const savedLenses = await AsyncStorage.getItem('myLenses');
+      if (savedCameras) setMyCameras(JSON.parse(savedCameras));
+      if (savedLenses) setMyLenses(JSON.parse(savedLenses));
+    } catch (error) {
+      console.error('Error loading saved gear:', error);
+    }
+  };
+
+  const filteredCameras = sonyCameras.filter(cam => myCameras.includes(cam.id));
+  const filteredLenses = sonyLenses.filter(lens => myLenses.includes(lens.id));
 
   const camera = sonyCameras.find((cam) => cam.id === parseInt(selectedCamera));
   const lens = sonyLenses.find((lens) => lens.id === parseInt(selectedLens));
@@ -21,6 +42,18 @@ export default function SonyCalculator() {
           <Card.Content>
             <Title style={styles.title}>Sony Lens Calculator</Title>
 
+            {filteredCameras.length === 0 && (
+              <Text style={styles.noGearText}>
+                Please add your cameras in the My Gear page
+              </Text>
+            )}
+
+            {filteredLenses.length === 0 && (
+              <Text style={styles.noGearText}>
+                Please add your lenses in the My Gear page
+              </Text>
+            )}
+
             <View style={styles.selectContainer}>
               <Title style={styles.selectLabel}>Camera</Title>
               <SegmentedButtons
@@ -28,7 +61,7 @@ export default function SonyCalculator() {
                 onValueChange={(value) => setSelectedCamera(value)}
                 buttons={[
                   { value: "", label: "Select Camera" },
-                  ...sonyCameras.map((camera) => ({
+                  ...filteredCameras.map((camera) => ({
                     value: camera.id.toString(),
                     label: camera.model,
                   })),
@@ -44,7 +77,7 @@ export default function SonyCalculator() {
                 onValueChange={(value) => setSelectedLens(value)}
                 buttons={[
                   { value: "", label: "Select Lens" },
-                  ...sonyLenses.map((lens) => ({
+                  ...filteredLenses.map((lens) => ({
                     value: lens.id.toString(),
                     label: lens.model,
                   })),
@@ -137,5 +170,11 @@ const styles = StyleSheet.create({
   resultTitle: {
     fontSize: 20,
     marginBottom: 12,
+  },
+  noGearText: {
+    textAlign: 'center',
+    color: '#666',
+    marginBottom: 16,
+    fontStyle: 'italic',
   },
 });
