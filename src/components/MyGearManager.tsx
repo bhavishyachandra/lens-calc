@@ -24,19 +24,29 @@ export default function MyGearManager() {
     };
 
     const toggleCamera = async (cameraId: number) => {
-        const newCameras = myCameras.includes(cameraId)
-            ? myCameras.filter(id => id !== cameraId)
-            : [...myCameras, cameraId];
-        setMyCameras(newCameras);
-        await AsyncStorage.setItem('myCameras', JSON.stringify(newCameras));
+        try {
+            const newCameras = myCameras.includes(cameraId)
+                ? myCameras.filter(id => id !== cameraId)
+                : [...myCameras, cameraId];
+            setMyCameras(newCameras);
+            await AsyncStorage.setItem('myCameras', JSON.stringify(newCameras));
+            console.log('Saved cameras:', newCameras); // Debug log
+        } catch (error) {
+            console.error('Error saving cameras:', error);
+        }
     };
 
     const toggleLens = async (lensId: number) => {
-        const newLenses = myLenses.includes(lensId)
-            ? myLenses.filter(id => id !== lensId)
-            : [...myLenses, lensId];
-        setMyLenses(newLenses);
-        await AsyncStorage.setItem('myLenses', JSON.stringify(newLenses));
+        try {
+            const newLenses = myLenses.includes(lensId)
+                ? myLenses.filter(id => id !== lensId)
+                : [...myLenses, lensId];
+            setMyLenses(newLenses);
+            await AsyncStorage.setItem('myLenses', JSON.stringify(newLenses));
+            console.log('Saved lenses:', newLenses); // Debug log
+        } catch (error) {
+            console.error('Error saving lenses:', error);
+        }
     };
 
     return (

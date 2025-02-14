@@ -14,12 +14,31 @@ export default function SonyCalculator() {
     loadSavedGear();
   }, []);
 
+  useEffect(() => {
+    const interval = setInterval(loadSavedGear, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   const loadSavedGear = async () => {
     try {
       const savedCameras = await AsyncStorage.getItem('myCameras');
       const savedLenses = await AsyncStorage.getItem('myLenses');
-      if (savedCameras) setMyCameras(JSON.parse(savedCameras));
-      if (savedLenses) setMyLenses(JSON.parse(savedLenses));
+      if (savedCameras) {
+        const parsedCameras = JSON.parse(savedCameras);
+        setMyCameras(parsedCameras);
+
+        if (selectedCamera && !parsedCameras.includes(parseInt(selectedCamera))) {
+          setSelectedCamera("");
+        }
+      }
+      if (savedLenses) {
+        const parsedLenses = JSON.parse(savedLenses);
+        setMyLenses(parsedLenses);
+
+        if (selectedLens && !parsedLenses.includes(parseInt(selectedLens))) {
+          setSelectedLens("");
+        }
+      }
     } catch (error) {
       console.error('Error loading saved gear:', error);
     }
