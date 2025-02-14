@@ -50,8 +50,17 @@ export default function SonyCalculator() {
   const camera = sonyCameras.find((cam) => cam.id === parseInt(selectedCamera));
   const lens = sonyLenses.find((lens) => lens.id === parseInt(selectedLens));
 
-  const calculateEquivalent = (focalLength: number, cropFactor: number) => {
-    return Math.round(focalLength * cropFactor);
+  const calculateEquivalent = (focalLength: number, mode: any, lens: any) => {
+    // Default crop factors if cropModes is not defined
+    const defaultCrops = {
+      "full-frame": { fullFrame: 1, apsC: 1.5 },
+      "aps-c": { fullFrame: 1.5, apsC: 1.5 }
+    };
+
+    // Use lens cropModes if available, otherwise use defaults
+    const cropModes = lens.cropModes || defaultCrops[lens.type as keyof typeof defaultCrops];
+    const effectiveCrop = lens.type === "aps-c" ? cropModes.fullFrame : mode.cropFactor;
+    return Math.round(focalLength * effectiveCrop);
   };
 
   return (
@@ -126,18 +135,22 @@ export default function SonyCalculator() {
                     {camera.modes.map((mode, index) => (
                       <DataTable.Row key={index}>
                         <DataTable.Cell>{mode.name}</DataTable.Cell>
-                        <DataTable.Cell numeric>{mode.cropFactor}x</DataTable.Cell>
+                        <DataTable.Cell numeric>
+                          {lens.type === "aps-c" ?
+                            (lens.cropModes?.fullFrame || 1.5) :
+                            mode.cropFactor}x
+                        </DataTable.Cell>
                         {lens.focalRange.min === lens.focalRange.max ? (
                           <DataTable.Cell numeric>
-                            {calculateEquivalent(lens.focalRange.min, mode.cropFactor)}mm
+                            {calculateEquivalent(lens.focalRange.min, mode, lens)}mm
                           </DataTable.Cell>
                         ) : (
                           <>
                             <DataTable.Cell numeric>
-                              {calculateEquivalent(lens.focalRange.min, mode.cropFactor)}mm
+                              {calculateEquivalent(lens.focalRange.min, mode, lens)}mm
                             </DataTable.Cell>
                             <DataTable.Cell numeric>
-                              {calculateEquivalent(lens.focalRange.max, mode.cropFactor)}mm
+                              {calculateEquivalent(lens.focalRange.max, mode, lens)}mm
                             </DataTable.Cell>
                           </>
                         )}
