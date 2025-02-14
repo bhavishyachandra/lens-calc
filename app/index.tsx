@@ -1,18 +1,18 @@
-import SonyCalculator from "../src/components/SonyCalculator";
+import { StyleSheet, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import SonyCalculator from '../src/components/SonyCalculator';
 
-export default function Home() {
+export default function App() {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto py-6 px-4">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Sony Lens Calculator
-          </h1>
-        </div>
-      </header>
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <SonyCalculator />
-      </main>
-    </div>
+    <SafeAreaView style={styles.container}>
+      <SonyCalculator />
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+});

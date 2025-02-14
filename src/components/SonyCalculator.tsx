@@ -1,9 +1,10 @@
 import React, { useState } from "react";
+import { View, StyleSheet, ScrollView } from "react-native";
+import { TextInput, Button, Card, Title, Text, Surface, DataTable, SegmentedButtons } from "react-native-paper";
 import { sonyCameras, sonyLenses } from "../data/sonyData";
 
 export default function SonyCalculator() {
   const [selectedCamera, setSelectedCamera] = useState("");
-  const [selectedMode, setSelectedMode] = useState("");
   const [selectedLens, setSelectedLens] = useState("");
 
   const camera = sonyCameras.find((cam) => cam.id === parseInt(selectedCamera));
@@ -14,85 +15,116 @@ export default function SonyCalculator() {
   };
 
   return (
-    <div className="p-4 max-w-2xl mx-auto">
-      <h2 className="text-2xl font-bold mb-4">Sony Lens Calculator</h2>
+    <ScrollView style={styles.scrollView}>
+      <Surface style={styles.container} elevation={2}>
+        <Card style={styles.card}>
+          <Card.Content>
+            <Title style={styles.title}>Sony Lens Calculator</Title>
 
-      <div className="space-y-4">
-        <div>
-          <label className="block mb-2">Camera:</label>
-          <select
-            className="w-full p-2 border rounded"
-            value={selectedCamera}
-            onChange={(e) => {
-              setSelectedCamera(e.target.value);
-              setSelectedMode("");
-            }}
-          >
-            <option value="">Select Camera</option>
-            {sonyCameras.map((camera) => (
-              <option key={camera.id} value={camera.id}>
-                {camera.model}
-              </option>
-            ))}
-          </select>
-        </div>
+            <View style={styles.selectContainer}>
+              <Title style={styles.selectLabel}>Camera</Title>
+              <SegmentedButtons
+                value={selectedCamera}
+                onValueChange={(value) => setSelectedCamera(value)}
+                buttons={[
+                  { value: "", label: "Select Camera" },
+                  ...sonyCameras.map((camera) => ({
+                    value: camera.id.toString(),
+                    label: camera.model,
+                  })),
+                ]}
+                style={styles.segmentedButton}
+              />
+            </View>
 
-        {camera && (
-          <div>
-            <label className="block mb-2">Mode:</label>
-            <select
-              className="w-full p-2 border rounded"
-              value={selectedMode}
-              onChange={(e) => setSelectedMode(e.target.value)}
-            >
-              <option value="">Select Mode</option>
-              {camera.modes.map((mode, index) => (
-                <option key={index} value={index}>
-                  {mode.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
+            <View style={styles.selectContainer}>
+              <Title style={styles.selectLabel}>Lens</Title>
+              <SegmentedButtons
+                value={selectedLens}
+                onValueChange={(value) => setSelectedLens(value)}
+                buttons={[
+                  { value: "", label: "Select Lens" },
+                  ...sonyLenses.map((lens) => ({
+                    value: lens.id.toString(),
+                    label: lens.model,
+                  })),
+                ]}
+                style={styles.segmentedButton}
+              />
+            </View>
 
-        <div>
-          <label className="block mb-2">Lens:</label>
-          <select
-            className="w-full p-2 border rounded"
-            value={selectedLens}
-            onChange={(e) => setSelectedLens(e.target.value)}
-          >
-            <option value="">Select Lens</option>
-            {sonyLenses.map((lens) => (
-              <option key={lens.id} value={lens.id}>
-                {lens.model}
-              </option>
-            ))}
-          </select>
-        </div>
+            {camera && lens && (
+              <Card style={styles.resultCard}>
+                <Card.Content>
+                  <Title style={styles.resultTitle}>Equivalent Focal Lengths</Title>
+                  <DataTable>
+                    <DataTable.Header>
+                      <DataTable.Title>Mode</DataTable.Title>
+                      <DataTable.Title>Crop Factor</DataTable.Title>
+                      <DataTable.Title>
+                        {lens.focalRange.min === lens.focalRange.max ? 'Focal Length' : 'Range'}
+                      </DataTable.Title>
+                    </DataTable.Header>
 
-        {camera && lens && selectedMode !== "" && (
-          <div className="mt-6 p-4 bg-gray-100 rounded">
-            <h3 className="font-bold mb-2">35mm Equivalent Focal Length:</h3>
-            <p>
-              {lens.focalRange.min}mm →{" "}
-              {calculateEquivalent(
-                lens.focalRange.min,
-                camera.modes[parseInt(selectedMode)].cropFactor
-              )}
-              mm to {lens.focalRange.max}mm →{" "}
-              {calculateEquivalent(
-                lens.focalRange.max,
-                camera.modes[parseInt(selectedMode)].cropFactor
-              )}
-              mm
-            </p>
-            <p className="text-sm text-gray-600 mt-2">
-              Crop Factor: {camera.modes[parseInt(selectedMode)].cropFactor}x
-            </p>
-          </div>
-        )}
-      </div>
-    </div>
+                    {camera.modes.map((mode, index) => (
+                      <DataTable.Row key={index}>
+                        <DataTable.Cell>{mode.name}</DataTable.Cell>
+                        <DataTable.Cell>{mode.cropFactor}x</DataTable.Cell>
+                        <DataTable.Cell>
+                          {lens.focalRange.min === lens.focalRange.max ? (
+                            `${lens.focalRange.min}mm → ${calculateEquivalent(lens.focalRange.min, mode.cropFactor)}mm`
+                          ) : (
+                            `${lens.focalRange.min}mm → ${calculateEquivalent(lens.focalRange.min, mode.cropFactor)}mm | 
+                             ${lens.focalRange.max}mm → ${calculateEquivalent(lens.focalRange.max, mode.cropFactor)}mm`
+                          )}
+                        </DataTable.Cell>
+                      </DataTable.Row>
+                    ))}
+                  </DataTable>
+                </Card.Content>
+              </Card>
+            )}
+          </Card.Content>
+        </Card>
+      </Surface>
+    </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  scrollView: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  container: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: '#f5f5f5',
+  },
+  card: {
+    marginVertical: 8,
+  },
+  title: {
+    textAlign: 'center',
+    marginBottom: 20,
+    fontSize: 24,
+  },
+  selectContainer: {
+    marginBottom: 20,
+  },
+  selectLabel: {
+    fontSize: 18,
+    marginBottom: 8,
+  },
+  segmentedButton: {
+    width: '100%',
+  },
+  resultCard: {
+    marginTop: 20,
+    backgroundColor: '#e3f2fd',
+  },
+  resultTitle: {
+    fontSize: 20,
+    marginBottom: 12,
+  },
+});
