@@ -61,49 +61,49 @@ export default function SonyCalculator() {
           <Card.Content>
             <Title style={styles.title}>Sony Lens Calculator</Title>
 
-            {filteredCameras.length === 0 && (
+            {filteredCameras.length === 0 ? (
               <Text style={styles.noGearText}>
                 Please add your cameras in the My Gear page
               </Text>
+            ) : (
+              <View style={styles.selectContainer}>
+                <Title style={styles.selectLabel}>Camera</Title>
+                <SegmentedButtons
+                  value={selectedCamera}
+                  onValueChange={(value) => setSelectedCamera(value)}
+                  buttons={[
+                    { value: "", label: "Select Camera" },
+                    ...filteredCameras.map((camera) => ({
+                      value: camera.id.toString(),
+                      label: camera.model,
+                    })),
+                  ]}
+                  style={styles.segmentedButton}
+                />
+              </View>
             )}
 
-            {filteredLenses.length === 0 && (
+            {filteredLenses.length === 0 ? (
               <Text style={styles.noGearText}>
                 Please add your lenses in the My Gear page
               </Text>
+            ) : (
+              <View style={styles.selectContainer}>
+                <Title style={styles.selectLabel}>Lens</Title>
+                <SegmentedButtons
+                  value={selectedLens}
+                  onValueChange={(value) => setSelectedLens(value)}
+                  buttons={[
+                    { value: "", label: "Select Lens" },
+                    ...filteredLenses.map((lens) => ({
+                      value: lens.id.toString(),
+                      label: lens.model,
+                    })),
+                  ]}
+                  style={styles.segmentedButton}
+                />
+              </View>
             )}
-
-            <View style={styles.selectContainer}>
-              <Title style={styles.selectLabel}>Camera</Title>
-              <SegmentedButtons
-                value={selectedCamera}
-                onValueChange={(value) => setSelectedCamera(value)}
-                buttons={[
-                  { value: "", label: "Select Camera" },
-                  ...filteredCameras.map((camera) => ({
-                    value: camera.id.toString(),
-                    label: camera.model,
-                  })),
-                ]}
-                style={styles.segmentedButton}
-              />
-            </View>
-
-            <View style={styles.selectContainer}>
-              <Title style={styles.selectLabel}>Lens</Title>
-              <SegmentedButtons
-                value={selectedLens}
-                onValueChange={(value) => setSelectedLens(value)}
-                buttons={[
-                  { value: "", label: "Select Lens" },
-                  ...filteredLenses.map((lens) => ({
-                    value: lens.id.toString(),
-                    label: lens.model,
-                  })),
-                ]}
-                style={styles.segmentedButton}
-              />
-            </View>
 
             {camera && lens && (
               <Card style={styles.resultCard}>
